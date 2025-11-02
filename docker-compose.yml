@@ -1,0 +1,153 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: finpilot
+      POSTGRES_PASSWORD: finpilot
+      POSTGRES_DB: finpilot
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://finpilot:finpilot@db:5432/finpilot
+      - REDIS_URL=redis://redis:6379/0
+      - ML_SERVICE_URL=http://ml_service:8080
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ml_service:
+        condition: service_started
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput || true &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://finpilot:finpilot@db:5432/finpilot
+      - REDIS_URL=redis://redis:6379/0
+      - ML_SERVICE_URL=http://ml_service:8080
+    depends_on:
+      - db
+      - redis
+      - ml_service
+    volumes:
+      - ./backend:/app
+    command: celery -A app.core.celery worker --loglevel=info
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://finpilot:finpilot@db:5432/finpilot
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+    command: celery -A app.core.celery beat --loglevel=info
+
+  ml_service:
+    build:
+      context: ./ml_service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ML_INTERNAL_TOKEN=secure_local_token_change_in_production
+      - PYTHONPATH=/app
+    volumes:
+      - ml_models:/app/models
+      - ml_data:/app/app/data/synthetic
+      - ml_logs:/app/app/training/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  ml_dashboard:
+    build:
+      context: ./ml_dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_ML_SERVICE_URL=http://localhost:8080
+    depends_on:
+      - ml_service
+    volumes:
+      - ./ml_dashboard:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  db_data:
+  ml_models:
+  ml_data:
+  ml_logs:
+
+networks:
+  default:
+    name: finpilot_net
+
