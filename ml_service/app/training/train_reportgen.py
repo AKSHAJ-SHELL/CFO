@@ -52,6 +52,8 @@ def train():
 	# Build vocabulary
 	print('Building vocabulary...')
 	summaries = df['summary_text'].tolist()
+	# Ensure all summaries are strings (handle any non-string values)
+	summaries = [str(s) if not isinstance(s, str) and s is not None else (s if isinstance(s, str) else '') for s in summaries]
 	vocab = build_vocab(summaries)
 	
 	# Split train/test

@@ -99,6 +99,8 @@ services:
       - ML_INTERNAL_TOKEN=secure_local_token_change_in_production
       - PYTHONPATH=/app
     volumes:
+      - ./ml_service/app:/app/app
+      - ./ml_service/start.sh:/app/start.sh
       - ml_models:/app/models
       - ml_data:/app/app/data/synthetic
       - ml_logs:/app/app/training/logs

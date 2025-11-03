@@ -1,46 +1,73 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import * as React from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 
-export default function Home() {
-	const router = useRouter()
+import { Button } from '@/components/ui/button'
+import { HeroBackground } from '@/components/hero-background'
 
-	useEffect(() => {
-		// Check if user is logged in
-		const token = localStorage.getItem('access_token')
-		if (token) {
-			router.push('/dashboard')
-		}
-	}, [router])
+const Hero3DShapes = dynamic(() => import('@/components/3d-hero-shapes'), {
+	ssr: false,
+})
 
+export default function HomePage() {
 	return (
-		<div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100'>
-			<div className='max-w-4xl mx-auto px-4 py-16 text-center'>
-				<h1 className='text-5xl font-bold text-gray-900 mb-4'>
-					FinPilot
-				</h1>
-				<p className='text-xl text-gray-600 mb-2'>
-					Your business finances, on autopilot.
-				</p>
-				<p className='text-gray-500 mb-8'>
-					AI-powered financial management for small business owners
-				</p>
-				<div className='flex gap-4 justify-center'>
-					<Link
-						href='/signup'
-						className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
-					>
-						Get Started
+		<div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+			<HeroBackground />
+			<Hero3DShapes />
+			
+			<div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+				<motion.h1
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6 }}
+					className="text-6xl md:text-7xl lg:text-8xl font-heading font-bold mb-6"
+				>
+					<span className="gradient-text">
+						Your business finances,
+					</span>
+					<br />
+					<span className="text-foreground">reimagined.</span>
+				</motion.h1>
+
+				<motion.p
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.2 }}
+					className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto"
+				>
+					FinPilot — AI CFO for small business owners.
+				</motion.p>
+
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.4 }}
+					className="flex items-center justify-center gap-4"
+				>
+					<Link href="/dashboard">
+						<Button size="lg" className="group">
+							Try FinPilot
+							<ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+						</Button>
 					</Link>
-					<Link
-						href='/login'
-						className='px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition'
-					>
-						Sign In
+					<Link href="/dashboard">
+						<Button size="lg" variant="outline" className="group">
+							Live Demo
+						</Button>
 					</Link>
-				</div>
+				</motion.div>
+
+				{/* Floating shape decoration */}
+				<motion.div
+					className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-r from-[#5e81f4]/30 to-[#81d4fa]/30 rounded-full blur-3xl float-animation"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ duration: 1, delay: 0.6 }}
+				/>
 			</div>
 		</div>
 	)

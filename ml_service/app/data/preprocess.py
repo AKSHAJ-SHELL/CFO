@@ -9,8 +9,14 @@ from torch.utils.data import Dataset
 
 def clean_text(text: str) -> str:
 	"""Clean transaction description"""
-	# Handle non-string inputs (NaN, None, etc.)
-	if not isinstance(text, str):
+	# Handle non-string inputs (NaN, None, lists, etc.)
+	if isinstance(text, list):
+		# If it's a list, join it if it contains strings, otherwise convert
+		if text and isinstance(text[0], str):
+			text = ' '.join(text)
+		else:
+			text = ' '.join(str(item) for item in text)
+	elif not isinstance(text, str):
 		text = str(text) if text is not None else ''
 	# Remove special characters, normalize whitespace
 	text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
@@ -65,8 +71,14 @@ class ReportDataset(Dataset):
 		
 		# Tokenize summary
 		summary = self.summaries[idx]
-		# Ensure summary is a string (handle NaN, None, etc.)
-		if not isinstance(summary, str):
+		# Ensure summary is a string (handle NaN, None, lists, etc.)
+		if isinstance(summary, list):
+			# If it's a list, try to join it if it contains strings, otherwise convert
+			if summary and isinstance(summary[0], str):
+				summary = ' '.join(summary)
+			else:
+				summary = ' '.join(str(item) for item in summary)
+		elif not isinstance(summary, str):
 			summary = str(summary) if summary is not None else ''
 		tokens = tokenize(summary, self.vocab)
 		if len(tokens) > self.max_len:

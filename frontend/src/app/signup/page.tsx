@@ -1,28 +1,55 @@
 'use client'
 
+import * as React from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import api from '@/lib/api'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card'
+import { HeroBackground } from '@/components/hero-background'
+import { api } from '@/lib/api'
 
 export default function SignupPage() {
 	const router = useRouter()
 	const [formData, setFormData] = useState({
-		email: '',
-		password: '',
-		passwordConfirm: '',
 		name: '',
-		orgName: '',
+		email: '',
+		org_name: '',
+		password: '',
+		password_confirm: '',
 	})
 	const [error, setError] = useState('')
 	const [loading, setLoading] = useState(false)
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFormData({
+			...formData,
+			[e.target.id]: e.target.value,
+		})
+		setError('')
+	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setError('')
 
-		if (formData.password !== formData.passwordConfirm) {
+		// Client-side validation
+		if (formData.password !== formData.password_confirm) {
 			setError('Passwords do not match')
+			return
+		}
+
+		if (formData.password.length < 8) {
+			setError('Password must be at least 8 characters long')
 			return
 		}
 
@@ -32,118 +59,137 @@ export default function SignupPage() {
 			const response = await api.post('/auth/register/', {
 				email: formData.email,
 				password: formData.password,
-				password_confirm: formData.passwordConfirm,
+				password_confirm: formData.password_confirm,
 				name: formData.name,
-				org_name: formData.orgName,
+				org_name: formData.org_name,
 			})
-			localStorage.setItem('access_token', response.data.tokens.access)
-			localStorage.setItem('refresh_token', response.data.tokens.refresh)
-			localStorage.setItem('org_id', response.data.org?.id || '')
+
+			const { tokens, user } = response.data
+
+			// Store tokens in localStorage
+			if (tokens?.access) {
+				localStorage.setItem('access_token', tokens.access)
+			}
+			if (tokens?.refresh) {
+				localStorage.setItem('refresh_token', tokens.refresh)
+			}
+
+			// Store user data if needed
+			if (user) {
+				localStorage.setItem('user', JSON.stringify(user))
+			}
+
+			// Redirect to dashboard
 			router.push('/dashboard')
 		} catch (err: any) {
-			setError(err.response?.data?.error || 'Registration failed')
+			const errorMessage =
+				err.response?.data?.error ||
+				err.response?.data?.detail ||
+				Object.values(err.response?.data || {}).flat()[0] ||
+				'Failed to create account. Please try again.'
+			setError(errorMessage)
 		} finally {
 			setLoading(false)
 		}
 	}
 
 	return (
-		<div className='min-h-screen flex items-center justify-center bg-gray-50'>
-			<div className='max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow'>
-				<div>
-					<h2 className='text-3xl font-bold text-center'>Sign Up</h2>
-					<p className='mt-2 text-center text-gray-600'>
-						Create your FinPilot account
-					</p>
-				</div>
-				<form className='mt-8 space-y-6' onSubmit={handleSubmit}>
-					{error && (
-						<div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded'>
-							{error}
-						</div>
-					)}
-					<div>
-						<label htmlFor='name' className='block text-sm font-medium text-gray-700'>
-							Your Name
-						</label>
-						<input
-							id='name'
-							type='text'
-							required
-							value={formData.name}
-							onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-						/>
-					</div>
-					<div>
-						<label htmlFor='email' className='block text-sm font-medium text-gray-700'>
-							Email
-						</label>
-						<input
-							id='email'
-							type='email'
-							required
-							value={formData.email}
-							onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-						/>
-					</div>
-					<div>
-						<label htmlFor='orgName' className='block text-sm font-medium text-gray-700'>
-							Business Name
-						</label>
-						<input
-							id='orgName'
-							type='text'
-							required
-							value={formData.orgName}
-							onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
-							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-						/>
-					</div>
-					<div>
-						<label htmlFor='password' className='block text-sm font-medium text-gray-700'>
-							Password
-						</label>
-						<input
-							id='password'
-							type='password'
-							required
-							value={formData.password}
-							onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-						/>
-					</div>
-					<div>
-						<label htmlFor='passwordConfirm' className='block text-sm font-medium text-gray-700'>
-							Confirm Password
-						</label>
-						<input
-							id='passwordConfirm'
-							type='password'
-							required
-							value={formData.passwordConfirm}
-							onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
-							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-						/>
-					</div>
-					<div>
-						<button
-							type='submit'
-							disabled={loading}
-							className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50'
-						>
-							{loading ? 'Creating account...' : 'Sign Up'}
-						</button>
-					</div>
-					<div className='text-center text-sm'>
-						<Link href='/login' className='text-blue-600 hover:text-blue-500'>
-							Already have an account? Sign in
-						</Link>
-					</div>
-				</form>
-			</div>
+		<div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+			<HeroBackground />
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.6 }}
+				className="relative z-10 w-full max-w-md px-6"
+			>
+				<Card>
+					<CardHeader className="space-y-1">
+						<CardTitle className="text-2xl font-heading">Sign Up</CardTitle>
+						<CardDescription>
+							Create your FinPilot account
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<form onSubmit={handleSubmit} className="space-y-4">
+							{error && (
+								<div className="rounded-md bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+									{error}
+								</div>
+							)}
+							<div className="space-y-2">
+								<Label htmlFor="name">Your Name</Label>
+								<Input
+									id="name"
+									placeholder="John Doe"
+									value={formData.name}
+									onChange={handleChange}
+									required
+									disabled={loading}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="email">Email</Label>
+								<Input
+									id="email"
+									type="email"
+									placeholder="you@example.com"
+									value={formData.email}
+									onChange={handleChange}
+									required
+									disabled={loading}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="org_name">Business Name</Label>
+								<Input
+									id="org_name"
+									placeholder="Acme Inc."
+									value={formData.org_name}
+									onChange={handleChange}
+									required
+									disabled={loading}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="password">Password</Label>
+								<Input
+									id="password"
+									type="password"
+									value={formData.password}
+									onChange={handleChange}
+									required
+									disabled={loading}
+									minLength={8}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="password_confirm">Confirm Password</Label>
+								<Input
+									id="password_confirm"
+									type="password"
+									value={formData.password_confirm}
+									onChange={handleChange}
+									required
+									disabled={loading}
+									minLength={8}
+								/>
+							</div>
+							<Button type="submit" className="w-full" disabled={loading}>
+								{loading ? 'Creating account...' : 'Sign Up'}
+							</Button>
+							<div className="text-center text-sm text-muted-foreground">
+								Already have an account?{' '}
+								<Link
+									href="/login"
+									className="text-primary hover:underline"
+								>
+									Sign in
+								</Link>
+							</div>
+						</form>
+					</CardContent>
+				</Card>
+			</motion.div>
 		</div>
 	)
 }
-
