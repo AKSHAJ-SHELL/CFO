@@ -1,0 +1,8 @@
+Single Line Command to Start Everything and Open Browser:
+
+PowerShell:
+docker-compose up -d; Start-Sleep -Seconds 8; Start-Process "http://localhost:3000"; docker-compose logs -f
+
+Or use the script:
+.\start.ps1
+

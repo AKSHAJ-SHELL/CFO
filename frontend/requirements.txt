@@ -1,0 +1,146 @@
+# FinPilot Frontend - npm Dependencies Requirements
+# This file lists all npm packages required for the FinPilot frontend
+# Install with: npm install (from frontend directory)
+
+# ============================================
+# Core Framework & Runtime
+# ============================================
+next==14.0.0
+react==^18.2.0
+react-dom==^18.2.0
+
+# ============================================
+# TypeScript & Type Definitions
+# ============================================
+typescript==^5
+@types/node==^20
+@types/react==^18
+@types/react-dom==^18
+@types/three==^0.159.0
+@types/d3==^7.4.3
+
+# ============================================
+# Styling & UI Framework
+# ============================================
+tailwindcss==^3.3.0
+tailwindcss-animate==^1.0.7
+autoprefixer==^10.0.1
+postcss==^8
+
+# ============================================
+# UI Component Libraries (Radix UI Primitives)
+# ============================================
+@radix-ui/react-dropdown-menu==^2.0.6
+@radix-ui/react-tabs==^1.0.4
+@radix-ui/react-select==^2.0.0
+@radix-ui/react-slot==^1.0.2
+@radix-ui/react-label==^2.0.2
+@radix-ui/react-switch==^1.0.3
+
+# ============================================
+# Animation & Motion
+# ============================================
+framer-motion==^10.16.0
+
+# ============================================
+# Icons
+# ============================================
+lucide-react==^0.292.0
+
+# ============================================
+# Data Fetching & State Management
+# ============================================
+@tanstack/react-query==^5.90.7
+
+# ============================================
+# 3D Graphics & Visualization
+# ============================================
+@react-three/fiber==^8.15.0
+@react-three/drei==^9.88.0
+three==^0.159.0
+
+# ============================================
+# Charts & Data Visualization
+# ============================================
+recharts==^2.10.3
+d3==^7.8.5
+
+# ============================================
+# Theme Management
+# ============================================
+next-themes==^0.2.1
+
+# ============================================
+# File Handling
+# ============================================
+react-dropzone==^14.2.3
+
+# ============================================
+# React Hooks & Utilities
+# ============================================
+react-use==^17.4.2
+
+# ============================================
+# INSTALLATION INSTRUCTIONS
+# ============================================
+# 
+# 1. Navigate to frontend directory:
+#    cd frontend
+#
+# 2. Install all dependencies from package.json:
+#    npm install
+#
+# 3. Or install specific packages:
+#    npm install <package-name>@<version>
+#
+# 4. For development server:
+#    npm run dev
+#
+# 5. For production build:
+#    npm run build
+#
+# 6. For production server:
+#    npm run start
+#
+# ============================================
+# IMPORTANT NOTES
+# ============================================
+# - This requirements.txt is for reference only
+# - Actual dependencies are managed in package.json
+# - Always use: npm install (not pip install)
+# - package.json is the source of truth for npm
+# - Version numbers here match package.json versions
+# - Some packages may have peer dependencies that npm resolves automatically
+
+# ============================================
+# PACKAGE USAGE BREAKDOWN
+# ============================================
+#
+# Core Framework:
+#   - next: Next.js framework (App Router)
+#   - react, react-dom: React library
+#
+# UI Components:
+#   - @radix-ui/*: Accessible UI primitives
+#   - lucide-react: Icon library
+#   - tailwindcss: Utility-first CSS framework
+#
+# Animation:
+#   - framer-motion: Animation library
+#
+# 3D Graphics:
+#   - @react-three/fiber: React renderer for Three.js
+#   - @react-three/drei: Helpers for react-three/fiber
+#   - three: 3D graphics library
+#
+# Data Visualization:
+#   - recharts: React charting library
+#   - d3: Data visualization library
+#
+# Data Fetching:
+#   - @tanstack/react-query: Server state management
+#
+# Utilities:
+#   - next-themes: Theme switching
+#   - react-dropzone: File upload component
+#   - react-use: React hooks collection

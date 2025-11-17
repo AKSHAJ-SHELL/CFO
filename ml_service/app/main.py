@@ -8,8 +8,13 @@ import os
 from app.config import ML_INTERNAL_TOKEN
 from app.inference.classifier_infer import ClassifierInference
 from app.inference.report_infer import ReportInference
+from app.inference.invoice_infer import predict_payment, generate_collection_message
 from app.schemas.classifier_schema import ClassifierRequest, ClassifierResponse
 from app.schemas.report_schema import ReportRequest, ReportResponse
+from app.schemas.invoice_schema import (
+    PaymentPredictionRequest, PaymentPredictionResponse,
+    MessageGenerationRequest, MessageGenerationResponse
+)
 
 app = FastAPI(title='FinPilot ML Service', version='1.0.0')
 
@@ -80,4 +85,34 @@ def get_status():
 		'classifier_loaded': classifier_infer.model is not None,
 		'report_generator_loaded': report_infer.model is not None,
 	}
+
+
+@app.post('/predict_payment', response_model=PaymentPredictionResponse)
+def predict_invoice_payment(request: PaymentPredictionRequest, token: str = Depends(verify_token)):
+	"""Predict when an invoice will be paid"""
+	try:
+		result = predict_payment(request.dict())
+		return result
+	except Exception as e:
+		raise HTTPException(
+			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+			detail=str(e)
+		)
+
+
+@app.post('/generate_message', response_model=MessageGenerationResponse)
+def generate_invoice_message(request: MessageGenerationRequest, token: str = Depends(verify_token)):
+	"""Generate AI collection message for invoice"""
+	try:
+		result = generate_collection_message(
+			context=request.dict(exclude_none=True),
+			message_type=request.message_type,
+			tone=request.tone
+		)
+		return result
+	except Exception as e:
+		raise HTTPException(
+			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+			detail=str(e)
+		)
 

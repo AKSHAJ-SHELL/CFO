@@ -32,6 +32,12 @@ INSTALLED_APPS = [
 	'app.billing',
 	'app.connections',
 	'app.reports',
+	'app.invoices',  # Feature 1: Smart Invoice Management
+	'app.planning',  # Feature 3: Scenario Planning & Budget Simulator
+	'app.billpay',  # Feature 4: Bill Pay Automation & Approval Workflows
+	'app.profitability',  # Feature 5: Profitability Intelligence
+	'app.health',  # Feature 6: Financial Health Score & Benchmarking
+	'app.reserves',  # Feature 7: Smart Cash Reserves & Savings Automation
 ]
 
 MIDDLEWARE = [
@@ -164,6 +170,7 @@ ML_INTERNAL_TOKEN = config('ML_INTERNAL_TOKEN', default='secure_local_token_chan
 
 # Stripe
 STRIPE_API_KEY = config('STRIPE_API_KEY', default='')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')  # Same as API key
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
 
 # Plaid

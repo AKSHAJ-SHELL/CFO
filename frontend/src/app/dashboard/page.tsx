@@ -1,283 +1,248 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
-import {
-	TrendingUp,
-	TrendingDown,
-	AlertTriangle,
-	FileText,
-} from 'lucide-react'
-import {
-	LineChart,
-	Line,
-	AreaChart,
-	Area,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	Tooltip,
-	ResponsiveContainer,
-} from 'recharts'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { 
+  DollarSign, Zap, Brain, Sparkles, CheckCircle, ArrowRight, Settings, Plug,
+  FileText, Receipt, PieChart, Activity, PiggyBank, BarChart, FileBarChart,
+  TrendingUp, Bell, MessageSquare
+} from 'lucide-react';
+import SaaSNavbar from '@/components/saas/Navbar';
+import Section from '@/components/saas/Section';
+import BetaToolbar from '@/components/saas/BetaToolbar';
+import FileUpload from '@/components/saas/FileUpload';
+import { getFeatures, getFeatureStatus, seedDemoData, FEATURE_CATEGORIES } from '@/lib/mockApi';
+import type { Feature } from '@/lib/types';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAnomalies } from '@/hooks/use-api'
-import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils'
+/**
+ * Enhanced Beta Dashboard with category-based navigation
+ */
+export default function BetaDashboardPage() {
+  const [features] = useState<Feature[]>(getFeatures());
+  const [featureStatuses, setFeatureStatuses] = useState(getFeatureStatus());
 
-const FinanceSimulationScene = dynamic(
-	() => import('@/components/FinanceSimulationScene'),
-	{ ssr: false }
-)
+  useEffect(() => {
+    // Ensure all features are enabled
+    const statuses = getFeatureStatus();
+    const allEnabled = statuses.every(s => s.enabled);
+    if (!allEnabled) {
+      // Seed demo data to enable all features
+      if (typeof window !== 'undefined') {
+        seedDemoData();
+        setFeatureStatuses(getFeatureStatus());
+      }
+    }
+  }, []);
 
-// Mock data - replace with actual API calls
-const runwayData = [
-	{ month: 'Jan', runway: 180 },
-	{ month: 'Feb', runway: 165 },
-	{ month: 'Mar', runway: 150 },
-	{ month: 'Apr', runway: 135 },
-	{ month: 'May', runway: 120 },
-	{ month: 'Jun', runway: 105 },
-]
+  const categories = [
+    {
+      id: 'finances',
+      title: 'Finances',
+      description: 'Invoices, bills, profitability, health scores, cash reserves, analytics',
+      icon: DollarSign,
+      count: FEATURE_CATEGORIES.finances.length,
+      color: 'primary-blue',
+      bgColor: 'bg-primary-blue/10',
+      textColor: 'text-primary-blue',
+      buttonColor: 'bg-primary-blue hover:bg-primary-blue/90',
+    },
+    {
+      id: 'automation',
+      title: 'Automation',
+      description: 'Automated invoicing and bill payment workflows',
+      icon: Zap,
+      count: FEATURE_CATEGORIES.automation.length,
+      color: 'primary-green',
+      bgColor: 'bg-primary-green/10',
+      textColor: 'text-primary-green',
+      buttonColor: 'bg-primary-green hover:bg-primary-green/90',
+    },
+    {
+      id: 'models',
+      title: 'Models',
+      description: 'Scenario planning, budget simulation, and model training',
+      icon: Brain,
+      count: FEATURE_CATEGORIES.models.length,
+      color: 'accent-violet',
+      bgColor: 'bg-accent-violet/10',
+      textColor: 'text-accent-violet',
+      buttonColor: 'bg-accent-violet hover:bg-accent-violet/90',
+    },
+    {
+      id: 'ai',
+      title: 'AI',
+      description: 'AI-powered forecasting, alerts, and CFO chat',
+      icon: Sparkles,
+      count: FEATURE_CATEGORIES.ai.length,
+      color: 'primary-teal',
+      bgColor: 'bg-primary-teal/10',
+      textColor: 'text-primary-teal',
+      buttonColor: 'bg-primary-teal hover:bg-primary-teal/90',
+    },
+  ];
 
-const revenueExpenseData = [
-	{ month: 'Jan', revenue: 45000, expenses: 32000 },
-	{ month: 'Feb', revenue: 52000, expenses: 35000 },
-	{ month: 'Mar', revenue: 48000, expenses: 34000 },
-	{ month: 'Apr', revenue: 55000, expenses: 36000 },
-	{ month: 'May', revenue: 60000, expenses: 38000 },
-	{ month: 'Jun', revenue: 58000, expenses: 37000 },
-]
+  return (
+    <div className="min-h-screen bg-background-main">
+      <SaaSNavbar />
+      <BetaToolbar />
+      
+      <Section id="dashboard-hero" title="Beta Testing Dashboard" subtitle="All features enabled - Test everything!">
+        {/* Category Cards */}
+        <div className="mb-12">
+          <h3 className="text-xl font-semibold text-text-dark mb-6">Browse by Category</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {categories.map((category, index) => {
+              const Icon = category.icon;
+              return (
+                <Link
+                  key={category.id}
+                  href={`/dashboard/${category.id}`}
+                  className="block"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="card-base hover:shadow-xl transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-16 h-16 rounded-lg ${category.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <Icon className={`h-8 w-8 ${category.textColor}`} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="text-2xl font-bold text-text-dark group-hover:text-primary-blue transition-colors">{category.title}</h4>
+                            <span className="text-sm px-2 py-1 rounded bg-status-success/20 text-status-success">
+                              {category.count} features
+                            </span>
+                          </div>
+                          <p className="text-sm text-text-muted">{category.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className={`w-full px-6 py-3 text-white rounded-lg ${category.buttonColor} transition-colors inline-flex items-center justify-center space-x-2 group-hover:shadow-lg`}>
+                      <span>Explore {category.title}</span>
+                      <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-const containerVariants = {
-	hidden: { opacity: 0 },
-	visible: {
-		opacity: 1,
-		transition: {
-			staggerChildren: 0.1,
-		},
-	},
-}
+        {/* Quick Access - All Features */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-text-dark">Quick Access - All Features</h3>
+            <span className="text-sm text-text-muted">{features.length} features available</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {features.map((feature) => {
+              const featureIcons: Record<string, typeof FileText> = {
+                invoices: FileText,
+                'scenario-planner': TrendingUp,
+                'bill-pay': Receipt,
+                profitability: PieChart,
+                'health-score': Activity,
+                'cash-reserves': PiggyBank,
+                forecast: TrendingUp,
+                alerts: Bell,
+                analytics: BarChart,
+                chat: MessageSquare,
+                playground: Brain,
+                reports: FileBarChart,
+                settings: Settings,
+                integrations: Plug,
+              };
+              const FeatureIcon = featureIcons[feature.id] || FileText;
+              
+              return (
+                <Link
+                  key={feature.id}
+                  href={`/dashboard/${feature.id}`}
+                  className="group"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="card-base hover:shadow-lg transition-all cursor-pointer p-4 text-center"
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-primary-blue/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-blue/20 transition-colors">
+                      <FeatureIcon className="h-6 w-6 text-primary-blue" />
+                    </div>
+                    <h4 className="text-sm font-semibold text-text-dark mb-1 group-hover:text-primary-blue transition-colors line-clamp-2">
+                      {feature.title.split('&')[0].trim()}
+                    </h4>
+                    <span className="text-xs text-text-muted">Click to open</span>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-const itemVariants = {
-	hidden: { opacity: 0, y: 20 },
-	visible: { opacity: 1, y: 0 },
-}
+        {/* Quick Access to Settings & Integrations */}
+        <div className="mb-12">
+          <h3 className="text-xl font-semibold text-text-dark mb-4">More Tools</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/dashboard/settings"
+              className="group card-base hover:shadow-lg transition-all flex items-center space-x-4 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-primary-blue/10 transition-colors">
+                <Settings className="h-6 w-6 text-gray-600 group-hover:text-primary-blue transition-colors" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-text-dark group-hover:text-primary-blue transition-colors">Settings & Configuration</h4>
+                <p className="text-sm text-text-muted">Configure your FinPilot account</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-text-muted ml-auto group-hover:translate-x-1 group-hover:text-primary-blue transition-all" />
+            </Link>
+            <Link
+              href="/dashboard/integrations"
+              className="group card-base hover:shadow-lg transition-all flex items-center space-x-4 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-primary-blue/10 transition-colors">
+                <Plug className="h-6 w-6 text-gray-600 group-hover:text-primary-blue transition-colors" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-text-dark group-hover:text-primary-blue transition-colors">Integrations Hub</h4>
+                <p className="text-sm text-text-muted">Connect with your favorite tools</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-text-muted ml-auto group-hover:translate-x-1 group-hover:text-primary-blue transition-all" />
+            </Link>
+          </div>
+        </div>
 
-export default function DashboardPage() {
-	const { data: anomalies = [] } = useAnomalies()
+        {/* File Upload Section */}
+        <div className="mb-12">
+          <h3 className="text-xl font-semibold text-text-dark mb-4">Upload Financial Records</h3>
+          <div className="card-base">
+            <FileUpload />
+          </div>
+        </div>
 
-	return (
-		<motion.div
-			variants={containerVariants}
-			initial="hidden"
-			animate="visible"
-			className="space-y-6"
-		>
-			<div>
-				<h1 className="text-3xl font-bold font-heading">Dashboard</h1>
-				<p className="text-muted-foreground">
-					Overview of your financial health
-				</p>
-			</div>
-
-			{/* 3D Finance Simulation Scene */}
-			<motion.div
-				variants={itemVariants}
-				className="rounded-lg overflow-hidden border border-border bg-card/50 backdrop-blur-xl"
-			>
-				<FinanceSimulationScene apiUrl="/api/finances/series" />
-			</motion.div>
-
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-				{/* Runway & Burn Rate Card */}
-				<motion.div variants={itemVariants} className="md:col-span-2">
-					<Card>
-						<CardHeader>
-							<CardTitle>Cash Runway</CardTitle>
-							<CardDescription>Days until cash runs out</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="flex items-baseline space-x-2 mb-4">
-								<span className="text-4xl font-bold">105</span>
-								<span className="text-muted-foreground">days</span>
-							</div>
-							<ResponsiveContainer width="100%" height={150}>
-								<AreaChart data={runwayData}>
-									<defs>
-										<linearGradient id="runwayGradient" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="5%" stopColor="#5e81f4" stopOpacity={0.8} />
-											<stop offset="95%" stopColor="#5e81f4" stopOpacity={0} />
-										</linearGradient>
-									</defs>
-									<Area
-										type="monotone"
-										dataKey="runway"
-										stroke="#5e81f4"
-										fillOpacity={1}
-										fill="url(#runwayGradient)"
-									/>
-									<XAxis dataKey="month" />
-									<YAxis />
-								</AreaChart>
-							</ResponsiveContainer>
-						</CardContent>
-					</Card>
-				</motion.div>
-
-				{/* Revenue Card */}
-				<motion.div variants={itemVariants}>
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Revenue</CardTitle>
-							<TrendingUp className="h-4 w-4 text-chart-1" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">{formatCurrency(58000)}</div>
-							<p className="text-xs text-muted-foreground">
-								+12.5% from last month
-							</p>
-						</CardContent>
-					</Card>
-				</motion.div>
-
-				{/* Expenses Card */}
-				<motion.div variants={itemVariants}>
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Expenses</CardTitle>
-							<TrendingDown className="h-4 w-4 text-chart-2" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">{formatCurrency(37000)}</div>
-							<p className="text-xs text-muted-foreground">
-								-2.1% from last month
-							</p>
-						</CardContent>
-					</Card>
-				</motion.div>
-			</div>
-
-			{/* Revenue vs Expenses Chart */}
-			<motion.div variants={itemVariants}>
-				<Card>
-					<CardHeader>
-						<CardTitle>Revenue vs Expenses</CardTitle>
-						<CardDescription>Monthly comparison</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<ResponsiveContainer width="100%" height={300}>
-							<LineChart data={revenueExpenseData}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-								<XAxis dataKey="month" />
-								<YAxis />
-								<Tooltip
-									contentStyle={{
-										backgroundColor: 'hsl(var(--card))',
-										border: '1px solid hsl(var(--border))',
-										borderRadius: '0.5rem',
-									}}
-								/>
-								<Line
-									type="monotone"
-									dataKey="revenue"
-									stroke="#5e81f4"
-									strokeWidth={2}
-									name="Revenue"
-								/>
-								<Line
-									type="monotone"
-									dataKey="expenses"
-									stroke="#ef4444"
-									strokeWidth={2}
-									name="Expenses"
-								/>
-							</LineChart>
-						</ResponsiveContainer>
-					</CardContent>
-				</Card>
-			</motion.div>
-
-			<div className="grid gap-6 md:grid-cols-2">
-				{/* Recent Anomalies */}
-				<motion.div variants={itemVariants}>
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center space-x-2">
-								<AlertTriangle className="h-5 w-5" />
-								<span>Recent Anomalies</span>
-							</CardTitle>
-							<CardDescription>
-								Unusual transactions detected
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-4">
-								{anomalies.slice(0, 5).map((anomaly: any) => (
-									<div
-										key={anomaly.id}
-										className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent transition-colors"
-									>
-										<div className="flex-1">
-											<p className="text-sm font-medium">
-												{anomaly.transaction.description}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{formatRelativeTime(anomaly.created_at)}
-											</p>
-										</div>
-										<div className="text-right">
-											<p className="text-sm font-medium">
-												{formatCurrency(anomaly.transaction.amount)}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												Score: {anomaly.score.toFixed(2)}
-											</p>
-										</div>
-									</div>
-								))}
-								{anomalies.length === 0 && (
-									<p className="text-sm text-muted-foreground text-center py-4">
-										No anomalies detected
-									</p>
-								)}
-							</div>
-						</CardContent>
-					</Card>
-				</motion.div>
-
-				{/* Weekly Report */}
-				<motion.div variants={itemVariants}>
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center space-x-2">
-								<FileText className="h-5 w-5" />
-								<span>Weekly Report</span>
-							</CardTitle>
-							<CardDescription>
-								Latest financial summary
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-4 max-h-96 overflow-y-auto">
-								<div className="prose prose-invert max-w-none">
-									<p className="text-sm text-muted-foreground leading-relaxed">
-										Strong financial performance with revenue of $58,000 exceeding
-										expenses of $37,000. Net profit of $21,000. Cash runway: 105 days.
-										Key highlights include increased sales in Q2 and improved expense
-										management. Recommendation: Consider reinvesting profits for growth.
-									</p>
-								</div>
-								<div className="pt-4 border-t border-border">
-									<p className="text-xs text-muted-foreground">
-										Generated {formatRelativeTime(new Date().toISOString())}
-									</p>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</motion.div>
-			</div>
-		</motion.div>
-	)
+        {/* All Features Enabled Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-12 p-6 bg-gradient-to-r from-primary-teal to-primary-blue rounded-lg text-white"
+        >
+          <div className="flex items-center space-x-4">
+            <CheckCircle className="h-8 w-8" />
+            <div>
+              <h4 className="text-lg font-semibold mb-1">All Features Enabled</h4>
+              <p className="text-sm text-white/90">
+                All {features.length} features are active and ready for testing. Click on any category above to explore features.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </Section>
+    </div>
+  );
 }

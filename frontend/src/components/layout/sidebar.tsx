@@ -1,162 +1,133 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
-	LayoutDashboard,
-	Database,
-	Brain,
-	Play,
-	Settings,
-	Menu,
-	X,
-} from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+  LayoutDashboard,
+  FileText,
+  TrendingUp,
+  CreditCard,
+  DollarSign,
+  Activity,
+  PiggyBank,
+  BarChart3,
+  Bell,
+  LineChart,
+  MessageSquare,
+  FlaskConical,
+  Settings,
+  FileStack,
+  Menu,
+  X
+} from 'lucide-react';
+import { useState } from 'react';
 
 const navigation = [
-	{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-	{ name: 'Data', href: '/data', icon: Database },
-	{ name: 'Models', href: '/models', icon: Brain },
-	{ name: 'Playground', href: '/playground', icon: Play },
-	{ name: 'Settings', href: '/settings', icon: Settings },
-]
+  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Invoices & Collections', href: '/dashboard/invoices', icon: FileText },
+  { name: 'Scenario Planning', href: '/dashboard/scenario-planner', icon: TrendingUp },
+  { name: 'Bill Pay', href: '/dashboard/bill-pay', icon: CreditCard },
+  { name: 'Profitability', href: '/dashboard/profitability', icon: DollarSign },
+  { name: 'Health Score', href: '/dashboard/health-score', icon: Activity },
+  { name: 'Cash Reserves', href: '/dashboard/cash-reserves', icon: PiggyBank },
+  { name: 'Forecasting', href: '/dashboard/forecast', icon: BarChart3 },
+  { name: 'Alerts', href: '/dashboard/alerts', icon: Bell },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: LineChart },
+  { name: 'AI CFO Chat', href: '/dashboard/chat', icon: MessageSquare },
+  { name: 'Model Playground', href: '/dashboard/playground', icon: FlaskConical },
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Reports', href: '/dashboard/reports', icon: FileStack },
+];
 
-export function Sidebar() {
-	const pathname = usePathname()
-	const [mobileOpen, setMobileOpen] = React.useState(false)
+export default function Sidebar() {
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
-	return (
-		<>
-			<div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-				<div className="flex-1 flex flex-col min-h-0 bg-card border-r border-border">
-					<div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-						<div className="flex items-center flex-shrink-0 px-4">
-							<h1 className="text-2xl font-bold bg-gradient-to-r from-[#5e81f4] to-[#81d4fa] bg-clip-text text-transparent">
-								FinPilot
-							</h1>
-						</div>
-						<nav className="mt-8 flex-1 px-2 space-y-1">
-							{navigation.map((item) => {
-								const isActive = pathname === item.href
-								return (
-									<Link key={item.name} href={item.href}>
-										<motion.div
-											whileHover={{ scale: 1.02 }}
-											whileTap={{ scale: 0.98 }}
-											className={cn(
-												'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200',
-												isActive
-													? 'bg-primary/10 text-primary'
-													: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-											)}
-										>
-											<item.icon
-												className={cn(
-													'mr-3 flex-shrink-0 h-5 w-5',
-													isActive
-														? 'text-primary'
-														: 'text-muted-foreground group-hover:text-accent-foreground'
-												)}
-											/>
-											{item.name}
-										</motion.div>
-									</Link>
-								)
-							})}
-						</nav>
-					</div>
-				</div>
-			</div>
+  const NavContent = () => (
+    <div className="flex h-full flex-col">
+      {/* Logo */}
+      <div className="flex h-16 items-center justify-between px-4 border-b">
+        <Link href="/dashboard" className="flex items-center space-x-2">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600" />
+          <span className="text-xl font-bold">FinPilot</span>
+        </Link>
+        <button 
+          onClick={() => setIsOpen(false)} 
+          className="lg:hidden"
+        >
+          <X className="h-6 w-6" />
+        </button>
+      </div>
 
-			{/* Mobile sidebar */}
-			<div className="md:hidden">
-				<Button
-					variant="ghost"
-					size="icon"
-					className="fixed top-4 left-4 z-50"
-					onClick={() => setMobileOpen(!mobileOpen)}
-					aria-label="Toggle menu"
-				>
-					{mobileOpen ? (
-						<X className="h-6 w-6" />
-					) : (
-						<Menu className="h-6 w-6" />
-					)}
-				</Button>
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+        {navigation.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`
+                group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg
+                transition-colors duration-200
+                ${
+                  isActive
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                }
+              `}
+              onClick={() => setIsOpen(false)}
+            >
+              <item.icon
+                className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                  isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'
+                }`}
+              />
+              {item.name}
+            </Link>
+          );
+        })}
+      </nav>
 
-				<AnimatePresence>
-					{mobileOpen && (
-						<>
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								transition={{ duration: 0.2 }}
-								className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
-								onClick={() => setMobileOpen(false)}
-							/>
-							<motion.div
-								initial={{ x: -300 }}
-								animate={{ x: 0 }}
-								exit={{ x: -300 }}
-								transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-								className="fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border"
-							>
-								<div className="flex flex-col h-full">
-									<div className="flex items-center justify-between px-4 pt-5 pb-4">
-										<h1 className="text-2xl font-bold bg-gradient-to-r from-[#5e81f4] to-[#81d4fa] bg-clip-text text-transparent">
-											FinPilot
-										</h1>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => setMobileOpen(false)}
-										>
-											<X className="h-6 w-6" />
-										</Button>
-									</div>
-									<nav className="flex-1 px-2 space-y-1">
-										{navigation.map((item) => {
-											const isActive = pathname === item.href
-											return (
-												<Link
-													key={item.name}
-													href={item.href}
-													onClick={() => setMobileOpen(false)}
-												>
-													<div
-														className={cn(
-															'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200',
-															isActive
-																? 'bg-primary/10 text-primary'
-																: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-														)}
-													>
-														<item.icon
-															className={cn(
-																'mr-3 flex-shrink-0 h-5 w-5',
-																isActive
-																	? 'text-primary'
-																	: 'text-muted-foreground group-hover:text-accent-foreground'
-															)}
-														/>
-														{item.name}
-													</div>
-												</Link>
-											)
-										})}
-									</nav>
-								</div>
-							</motion.div>
-						</>
-					)}
-				</AnimatePresence>
-			</div>
-		</>
-	)
+      {/* Footer */}
+      <div className="border-t p-4">
+        <div className="flex items-center space-x-3">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">Demo User</p>
+            <p className="text-xs text-gray-500 truncate">demo@finpilot.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg"
+      >
+        <Menu className="h-6 w-6" />
+      </button>
+
+      {/* Mobile sidebar */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 z-40">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 shadow-xl">
+            <NavContent />
+          </div>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+        <div className="flex flex-col flex-grow border-r bg-white dark:bg-gray-900">
+          <NavContent />
+        </div>
+      </div>
+    </>
+  );
 }
-
